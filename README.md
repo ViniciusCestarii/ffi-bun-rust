@@ -44,7 +44,7 @@ To run the project:
 1. Navigate to the bun project folder:
 
 ```sh
-cd src/bun_project &&
+cd src/bun_project
 ```
 
 2. Execute the following command to build and run the project:
