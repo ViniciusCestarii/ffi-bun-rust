@@ -1,6 +1,29 @@
 import { dlopen, FFIType } from "bun:ffi";
 import path from "path"
 
+function myOwnQuicksort(arr: number[]): number[] {
+  if (arr.length <= 1) {
+      return arr;
+  }
+
+  const pivot = arr[Math.floor(arr.length / 2)];
+  const left = [];
+  const right = [];
+  const equal = [];
+
+  for (const num of arr) {
+      if (num < pivot) {
+          left.push(num);
+      } else if (num > pivot) {
+          right.push(num);
+      } else {
+          equal.push(num);
+      }
+  }
+
+  return [...myOwnQuicksort(left), ...equal, ...myOwnQuicksort(right)];
+}
+
 let platformSuffix;
 switch (process.platform) {
   case 'darwin':
@@ -43,7 +66,11 @@ lib.symbols.sort_array(bigArray.slice(), bigArray.length);
 console.timeEnd("Rust Sort time");
 
 console.time("JS Sort time");
-bigArray.sort((a, b) => a - b);
+bigArray.slice().sort((a, b) => a - b);
 console.timeEnd("JS Sort time");
+
+console.time("JS MyOwnQuicksort time");
+myOwnQuicksort(bigArray)
+console.timeEnd("JS MyOwnQuicksort time");
 
 
