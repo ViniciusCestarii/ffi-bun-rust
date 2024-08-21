@@ -2,26 +2,16 @@ import { dlopen, FFIType } from "bun:ffi";
 import path from "path"
 
 function myOwnQuicksort(arr: number[]): number[] {
-  if (arr.length <= 1) {
-      return arr;
-  }
+    if (arr.length <= 1) {
+        return arr;
+    }
 
-  const pivot = arr[Math.floor(arr.length / 2)];
-  const left = [];
-  const right = [];
-  const equal = [];
+    const pivot = arr[Math.floor(arr.length / 2)];
+    const left = arr.filter(x => x < pivot);
+    const middle = arr.filter(x => x === pivot);
+    const right = arr.filter(x => x > pivot);
 
-  for (const num of arr) {
-      if (num < pivot) {
-          left.push(num);
-      } else if (num > pivot) {
-          right.push(num);
-      } else {
-          equal.push(num);
-      }
-  }
-
-  return [...myOwnQuicksort(left), ...equal, ...myOwnQuicksort(right)];
+    return [...myOwnQuicksort(left), ...middle, ...myOwnQuicksort(right)];
 }
 
 let platformSuffix;
@@ -51,7 +41,7 @@ const lib = dlopen(libPath, {
 });
 
 const result = lib.symbols.add(3, 4);
-console.log(`Result from Rust: ${result}`);
+console.log(`Result from Rust: 3 + 4 = ${result}`);
 
 const array = new Int32Array([5, 3, 8, 1, 2]);
 console.log("Array before sort:", array);
@@ -61,16 +51,16 @@ console.log("Array after sort:", array);
 
 const bigArray = new Int32Array(Array.from({ length: 1000000 }, () => Math.floor(Math.random() * 1000000)))
 
-console.time("Rust Sort time");
+console.time(`Rust big array ${bigArray.length} length Sort time`);
 lib.symbols.sort_array(bigArray.slice(), bigArray.length);
-console.timeEnd("Rust Sort time");
+console.timeEnd(`Rust big array ${bigArray.length} length Sort time`);
 
-console.time("JS Sort time");
+console.time(`JS sort method big array ${bigArray.length} length Sort time`);
 bigArray.slice().sort((a, b) => a - b);
-console.timeEnd("JS Sort time");
+console.timeEnd(`JS sort method big array ${bigArray.length} length Sort time`);
 
-console.time("JS MyOwnQuicksort time");
-myOwnQuicksort(bigArray)
-console.timeEnd("JS MyOwnQuicksort time");
+console.time(`JS MyOwnQuic big array ${bigArray.length} length sort time`);
+myOwnQuicksort(Array.from(bigArray.slice()))
+console.timeEnd(`JS MyOwnQuic big array ${bigArray.length} length sort time`);
 
 
